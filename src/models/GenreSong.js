@@ -11,19 +11,9 @@ GenreSong.init({
             type: Sequelize.INTEGER,
             allowNull: false,
             primaryKey: true
-        },
-        // genreId: {
-        //     type: Sequelize.INTEGER,
-        //     allowNull: false,
-        //     references: {model: 'genres', key: 'id'}
-        //   },
-        //   songId: {
-        //     type: Sequelize.INTEGER,
-        //     allowNull: false,
-        //     references: {model: 'songs', key: 'id'}
-        //   }
+        }
     },
-    {sequelize, timestamps: false, modelName: 'genreSong'}
+    {sequelize, timestamps: false, modelName: 'genres_song'}
 )
 
 module.exports = GenreSong
