@@ -2,11 +2,11 @@ const { Sequelize } = require('sequelize');
 const sequelize = require('../utils/database');
 const GenreSong = require('./GenreSong');
 
-class Genre extends Sequelize.Model {
+class Song extends Sequelize.Model {
     
 }
 
-Genre.init({
+Song.init({
         id: {
             autoIncrement: true,
             type: Sequelize.INTEGER,
@@ -16,12 +16,20 @@ Genre.init({
         name: {
             type: Sequelize.STRING(255),
             allowNull: false,
-            unique: true
-        } 
+        },
+        youtubeLink: {
+            type: Sequelize.STRING(255),
+            allowNull: false,
+        },
+        score: {
+            type: Sequelize.INTEGER,
+            defaultValue: 0
+        }     
     },
-    {sequelize, timestamps: false, modelName: 'genre'}
+    {sequelize, timestamps: false, modelName: 'song'}
 )
 
-Genre.hasMany(GenreSong); //create genreId em GenreSong
+Song.hasMany(GenreSong);  //create songId em GenreSong
 
-module.exports = Genre
+
+module.exports = Song
