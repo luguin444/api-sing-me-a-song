@@ -1,6 +1,7 @@
 const supertest = require("supertest");
 const app = require("../src/app");
 const sequelize = require("../src/utils/database");
+const songsController = require('../src/controllers/songsController');
 
 const agent = supertest(app);
 
@@ -72,6 +73,104 @@ describe('POST /recommendations', () => {
                 score: 0,
                 youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y"
             })
+        );
+    })
+})
+
+describe('POST /recommendations/:id/upvote', () => {
+    
+    it('should return 200 and the score should be 1 ', async () => {
+
+        const genre = await sequelize.query("INSERT INTO genres (name) VALUES ('Metal') RETURNING *;");
+        const id = genre[0][0].id;
+
+        const body = {
+            "name": "Nirvana - Smell Like Tenn Spirit",
+            "genresIds": [ id ],
+            "youtubeLink": "https://www.youtube.com/watch?v=chwyjJbcs1Y"
+        };
+
+        const songResult = await agent.post('/recommendations').send(body);
+
+        const songId = songResult.body.id;
+
+        await agent.post(`/recommendations/${songId}/upvote`);
+        const result = await agent.post(`/recommendations/${songId}/upvote`);
+
+        expect(result.status).toBe(200);
+        expect(result.body).toEqual(
+            expect.objectContaining({
+                name: "Nirvana - Smell Like Tenn Spirit",
+                youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+                score: 2
+            })
+        );
+    })
+})
+
+describe('POST /recommendations/:id/downvote', () => {
+
+    it('should return 400 because the songId does not exist ', async () => {
+
+        const result = await agent.post(`/recommendations/-1/downvote`);
+
+        expect(result.status).toBe(400);
+    })
+    
+    it('should return 200 and the score should be -3 ', async () => {
+
+        const genre = await sequelize.query("INSERT INTO genres (name) VALUES ('Reggae') RETURNING *;");
+        const id = genre[0][0].id;
+
+        const body = {
+            "name": "SOJA - True Love",
+            "genresIds": [ id ],
+            "youtubeLink": "https://www.youtube.com/watch?v=chwyjJbcs1Y"
+        };
+
+        const songResult = await agent.post('/recommendations').send(body);
+
+        const songId = songResult.body.id;
+
+        await agent.post(`/recommendations/${songId}/downvote`);
+        await agent.post(`/recommendations/${songId}/downvote`);
+        const result = await agent.post(`/recommendations/${songId}/downvote`);
+
+        expect(result.status).toBe(200);
+        expect(result.body).toEqual(
+            expect.objectContaining({
+                name: "SOJA - True Love",
+                youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+                score: -3
+            })
+        );
+    })
+
+    it('should return 200 and {} because the song was destroyed ', async () => {
+
+        const genre = await sequelize.query("INSERT INTO genres (name) VALUES ('Axé') RETURNING *;");
+        const id = genre[0][0].id;
+
+        const body = {
+            "name": "SOJA - True Love",
+            "genresIds": [ id ],
+            "youtubeLink": "https://www.youtube.com/watch?v=chwyjJbcs1Y"
+        };
+
+        const songResult = await agent.post('/recommendations').send(body);
+
+        const songId = songResult.body.id;
+
+        await agent.post(`/recommendations/${songId}/downvote`);
+        await agent.post(`/recommendations/${songId}/downvote`);
+        await agent.post(`/recommendations/${songId}/downvote`);
+        await agent.post(`/recommendations/${songId}/downvote`);
+        await agent.post(`/recommendations/${songId}/downvote`);
+        const result = await agent.post(`/recommendations/${songId}/downvote`);
+
+        expect(result.status).toBe(200);
+        expect(result.body).toEqual(
+            expect.objectContaining({})
         );
     })
 })
