@@ -1,5 +1,6 @@
 const { Sequelize } = require('sequelize');
 const sequelize = require('../utils/database');
+const Genre = require('./Genre');
 const GenreSong = require('./GenreSong');
 
 class Song extends Sequelize.Model {
@@ -30,6 +31,7 @@ Song.init({
 )
 
 Song.hasMany(GenreSong);  //create songId em GenreSong
+Song.belongsToMany( Genre , { through: GenreSong });  //pegar os generos dentro da de Song com includes relacionamento n:m
 
 
 module.exports = Song

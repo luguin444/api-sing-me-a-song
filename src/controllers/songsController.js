@@ -3,6 +3,8 @@ const Song = require('../models/Song');
 const GenreNotExists = require('../errors/GenreNotExists');
 const songDoesNotExists = require('../errors/songDoesNotExists');
 const GenreSong = require('../models/GenreSong');
+const { Sequelize } = require('sequelize');
+const { Op } = require("sequelize");
 
 async function postSong(songData) {
 
@@ -52,8 +54,60 @@ async function downVote(id) {
     return updatedSong;
 }
 
+async function getRecommendation() {
+
+    const allSongs = await Song.findAll();
+    if(allSongs.length === 0) {
+        throw new songDoesNotExists();
+    }
+    let song = null;
+    const anyOfThemHasScoreGreaterThanTen = allSongs.find(s => s.score > 10);
+    
+    if (anyOfThemHasScoreGreaterThanTen === undefined) {
+        song = await Song.findAll({
+            order: Sequelize.literal('random()'),
+            limit: 1,
+            include: { 
+                model: Genre,
+                through: {attributes: []}
+             }
+        });
+        return song;
+    }
+
+    const randomNumber = Math.random();
+
+    if (randomNumber >= 0.3) {
+        song = await Song.findAll({
+            order: Sequelize.literal('random()'),
+            limit: 1,
+            where: {
+                score: { [Op.gt]: 10 }
+            },
+            include: { 
+                model: Genre,
+                through: {attributes: []}
+             }
+        });
+    } else {
+        song = await Song.findAll({
+            order: Sequelize.literal('random()'),
+            limit: 1,
+            where: {
+                score: { [Op.between]: [-5,10] }
+            },
+            include: { 
+                model: Genre,
+                through: {attributes: []}
+             }
+        });
+    }
+    return song;
+}
+
 module.exports = {
     postSong,
     upVote,
-    downVote
+    downVote,
+    getRecommendation
 }

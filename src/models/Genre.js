@@ -24,4 +24,5 @@ Genre.init({
 
 Genre.hasMany(GenreSong); //create genreId em GenreSong
 
+
 module.exports = Genre

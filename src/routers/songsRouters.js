@@ -63,5 +63,21 @@ router.post('/:id/downvote', async (req,res) => {
     }
 })
 
+router.get('/random', async (req,res) => {
+
+    try {
+        const song = await songsController.getRecommendation();
+        res.status(200).send(song);
+    } catch (error) {
+        console.log(error);
+        if (error instanceof songDoesNotExists) {
+            return res.status(404).send({error: 'There is no recommendation'});
+        }
+        res.status(500).send({error: 'Unknown error'});
+    }
+})
+
+
+
 
 module.exports = router;
