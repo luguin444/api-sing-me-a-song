@@ -1,6 +1,7 @@
 const router = require('express').Router();
 
 const genresController = require('../controllers/genresController');
+const GenreNotUnique = require('../errors/GenreNotUnique');
 
 router.post('/', async (req,res) => {
 
@@ -8,20 +9,30 @@ router.post('/', async (req,res) => {
         return res.sendStatus(422);
     }
 
-    const genre = await genresController.postGenre(req.body.name);
+    try {
+        const genre = await genresController.postGenre(req.body.name);
+        res.status(201).send(genre);
 
-    if(typeof(genre) === "string") return res.status(500).send({error: genre });
+    } catch (error) {
 
-    res.status(201).send(genre);
+        if (error instanceof GenreNotUnique) {
+            return res.status(409).send({error: 'Genre must be unique' })
+        }
+        return res.status(500).send({error: genre });
+    }    
 })
 
 router.get('/', async (req,res) => {
 
-    const genres = await genresController.getGenres();
-    
-    // if(typeof(genre) === "string") return res.status(500).send({error: genre });
+    try {
+        const genres = await genresController.getGenres();
+        res.status(200).send(genres);
+        
+    } catch (err) {
+        return res.status(500).send({error: err.errors[0].message })
+    }
 
-    res.status(200).send(genres);
+    
 })
 
 

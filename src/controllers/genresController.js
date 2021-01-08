@@ -1,28 +1,26 @@
-
+const GenreNotUnique = require('../errors/GenreNotUnique');
 const Genre = require('../models/Genre')
 
 async function postGenre(name) {
 
-    try {
+        const genreAlreadyExists = await Genre.findOne({where: {name}})
+        if (genreAlreadyExists) {
+            throw new GenreNotUnique();
+        }
+
         const genre = await Genre.create({name});
         return genre;
-    } catch(e) {
-        return e.errors[0].message;
-    }
 }
 
 async function getGenres(name) {
 
-    try {
-        const genres = await Genre.findAll({
-            order: [
-                ['name', 'ASC']
-            ]
-        });
-        return genres;
-    } catch(e) {
-        return e.errors[0].message;
-    }
+    const genres = await Genre.findAll({
+        order: [
+            ['name', 'ASC']
+        ]
+    });
+    
+    return genres;
 }
 
 module.exports = {

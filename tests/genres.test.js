@@ -4,7 +4,7 @@ const sequelize = require("../src/utils/database");
 
 const agent = supertest(app);
 
-beforeAll(async () => {
+beforeEach(async () => {
     await sequelize.query("DELETE FROM genres;");
   });
   
@@ -35,13 +35,15 @@ describe('POST /genres', () => {
         );
         expect(result.status).toBe(201);
     })
-    it('should return 500 because this genre already exists', async () => {
+    it('should return 409 because this genre already exists', async () => {
         const body = {
             name: "Arrocha"
         };
+
+        await agent.post('/genres').send(body);
         const result = await agent.post('/genres').send(body);
 
-        expect(result.status).toBe(500);
+        expect(result.status).toBe(409);
     })
 })
 
@@ -49,6 +51,11 @@ describe('GET /genres', () => {
     
     it('should return 200 with an array containing all genres' , async () => {
 
+        const body = {
+            name: "Arrocha"
+        };
+
+        await agent.post('/genres').send(body);
         const result = await agent.get('/genres');
 
         expect(result.body).toEqual(
