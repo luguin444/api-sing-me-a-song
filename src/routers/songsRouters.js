@@ -77,6 +77,25 @@ router.get('/random', async (req,res) => {
     }
 })
 
+router.get('/genres/:id/random', async (req,res) => {
+
+    const id = req.params.id
+
+    try {
+        const song = await songsController.getRecommendationByGenre(id);
+        res.status(200).send(song);
+    } catch (error) {
+        console.log(error);
+        if (error instanceof songDoesNotExists) {
+            return res.status(404).send({error: 'There is no recommendation'});
+        }
+        res.status(500).send({error: 'Unknown error'});
+    }
+})
+
+
+
+
 
 
 
