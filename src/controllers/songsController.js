@@ -108,6 +108,11 @@ async function getRecommendation() {
 
 async function getRecommendationByGenre(id) {
 
+    const genre = await Genre.findOne({ where: { id } });
+    if (!genre) {
+        throw new GenreNotExists();
+    }
+
     const allSongsFromGenre = await Song.findAll({
         include: { 
             model: Genre,
@@ -129,7 +134,7 @@ async function getRecommendationByGenre(id) {
     
     if (anyOfThemHasScoreGreaterThanTen === undefined || allSongsHasScoreGreaterThanTen ) {
         song = allSongsFromGenre[Math.floor(Math.random() * allSongsFromGenre.length)];
-        return song;
+        return [song];
     }
     
     const randomNumber = Math.random();

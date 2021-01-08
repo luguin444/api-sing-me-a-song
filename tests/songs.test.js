@@ -5,19 +5,95 @@ const songsController = require('../src/controllers/songsController');
 
 const agent = supertest(app);
 
-beforeAll(async () => {
+beforeEach(async () => {
     await sequelize.query("DELETE FROM genres_songs;");
     await sequelize.query("DELETE FROM songs;");
     await sequelize.query("DELETE FROM genres;");
   });
   
-  afterAll(async () => {
+afterAll(async () => {
     await sequelize.query("DELETE FROM genres_songs;");
     await sequelize.query("DELETE FROM songs;");
     await sequelize.query("DELETE FROM genres;");
     await sequelize.close();
   });
 
+describe('GET /recommendations/random', () => {
+
+    //testar se volta 200, uma musica do genero proposto
+
+    it('should return 404 because there is no songs in database', async () => {
+
+        const result = await agent.get(`/recommendations/random`);
+
+        expect(result.status).toBe(404);
+    })
+    it('should return 200 and a recommendation', async () => {
+
+        const genre = await sequelize.query("INSERT INTO genres (name) VALUES ('teste') RETURNING *;");
+
+        const body = {
+            "name": "Falamansa - Xote dos Milagres",
+            "genresIds": [ genre[0][0].id ],
+            "youtubeLink": "https://www.youtube.com/watch?v=chwyjJbcs1Y"
+        };
+
+        const result = await agent.post('/recommendations').send(body);
+
+        const getSongResult = await agent.get(`/recommendations/random`);
+
+        expect(getSongResult.status).toBe(200);
+        expect(getSongResult.body).toEqual(
+                expect.objectContaining({
+                    name: "Falamansa - Xote dos Milagres",
+                    score: 0,
+                    youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+                    genres: [
+                        expect.objectContaining({
+                            name: "teste"
+                        })
+                    ] 
+                })
+        );
+
+    })
+})
+
+describe('GET /genres/:id/random', () => {
+
+
+    it('should return 200 and a recommendation', async () => {
+
+        const genre = await sequelize.query("INSERT INTO genres (name) VALUES ('teste') RETURNING *;");
+        const genreId = genre[0][0].id
+
+        const body = {
+            "name": "Falamansa - Xote dos Milagres",
+            "genresIds": [ genreId ],
+            "youtubeLink": "https://www.youtube.com/watch?v=chwyjJbcs1Y"
+        };
+
+        const result = await agent.post('/recommendations').send(body);
+
+        const getSongResult = await agent.get(`/recommendations//genres/${genreId}/random`);
+
+        expect(getSongResult.status).toBe(200);
+        expect(getSongResult.body).toEqual(
+                expect.objectContaining({
+                    name: "Falamansa - Xote dos Milagres",
+                    score: 0,
+                    youtubeLink: "https://www.youtube.com/watch?v=chwyjJbcs1Y",
+                    genres: [
+                        expect.objectContaining({
+                            id: genreId,
+                            name: "teste"
+                        })
+                    ] 
+                })
+        );
+
+    })
+})
 
 describe('POST /recommendations', () => {
     
