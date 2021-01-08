@@ -22,7 +22,7 @@ router.post('/', async (req,res) => {
 
     } catch (error) {
         if(error instanceof GenreNotExists) {
-            return res.status(422).send({error: 'Some Id does not exist'});
+            return res.status(400).send({error: 'Some Id does not exist'});
         } 
         console.log(error)
         res.status(500).send({error: 'Unknown error'});
@@ -38,7 +38,6 @@ router.post('/:id/upvote', async (req,res) => {
         res.status(200).send(updatedsong);
         
     } catch (error) {
-        console.log(error);
         if (error instanceof songDoesNotExists) {
             return res.status(400).send({error: 'Song Id does not exists'});
         }

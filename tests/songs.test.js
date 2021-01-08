@@ -107,7 +107,7 @@ describe('POST /recommendations', () => {
 
         expect(result.status).toBe(422);
     })
-    it('should return 422 because Id does not exists', async () => {
+    it('should return 400 because Id does not exists', async () => {
         const body = {
             "name": "Falamansa - Xote dos Milagres",
             "genresIds": [-2],
@@ -115,7 +115,7 @@ describe('POST /recommendations', () => {
         };
         const result = await agent.post('/recommendations').send(body);
 
-        expect(result.status).toBe(422);
+        expect(result.status).toBe(400);
     })
     it('should return 422 because is not a Youtube link', async () => {
 
