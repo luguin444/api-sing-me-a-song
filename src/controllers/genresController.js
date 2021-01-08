@@ -18,8 +18,7 @@ async function getGenres(name) {
         order: [
             ['name', 'ASC']
         ]
-    });
-    
+    }); 
     return genres;
 }
 
