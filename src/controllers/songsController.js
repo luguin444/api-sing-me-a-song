@@ -21,7 +21,6 @@ async function postSong(songData) {
     })
 
     await GenreSong.bulkCreate( genreVectorToInsert );
-
     return song;
 }
 
